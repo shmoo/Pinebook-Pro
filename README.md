@@ -34,7 +34,7 @@ TBD, for now see <https://forum.pine64.org/showthread.php?tid=17529>
 
 ## Phase 1: Creating a bootable Arch based SD card
 
-The following workflow was all done from a terminal from a Manjaro boot on my intenral emmc. All commands were run as root from a `sudo -s` shell. I did so many installations here trying to get something to work from Manjaro that eventually I just wrote a bash script. You shoould be able to copy & paste it into a root shell and have it work, up until the `arch-chroot` anyway. The chroot has an interactive portion where the UUID of your root partition on the SD card needs to be entered into the `Append` line of the `extlinux.conf` file. If you use vi like me, you can easily cheat by just using `:read !blikd -s UUID -o value /dev/mmcblk1p2` to get the UUID inside of the vi session.
+The following workflow was all done from a terminal from a Manjaro boot on my intenral emmc. All commands were run as root from a `sudo -s` shell. I did so many installations here trying to get something to work from Manjaro that eventually I just wrote a bash script. You shoould be able to copy & paste it into a root shell and have it work, up until the `arch-chroot` anyway. The chroot has an interactive portion where the UUID of your root partition on the SD card needs to be entered into the `Append` line of the `extlinux.conf` file. If you use vi like me, you can easily cheat by just using `:read !blkid -s UUID -o value /dev/mmcblk1p2` to get the UUID inside of the vi session.
 
 ```bash
 # zero out SD card for use
@@ -227,7 +227,7 @@ ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
 
 ###### Edit the extlinux.conf
 
-The `cryptdevice=UUID=` line(s) need to be set to the UUID of your encrypted NVME partition. You can use `blkid -s UUID` to get the UUID you need. In my case it was the output of `blkid -s UUID /dev/nvme0n1p2`
+The `cryptdevice=UUID=` line(s) need to be set to the UUID of your encrypted NVME partition. You can use `blkid -s UUID -o value` to get the UUID you need. In my case it was the output of `blkid -s UUID -o value /dev/nvme0n1p2`
 
 ```config
 DEFAULT arch
