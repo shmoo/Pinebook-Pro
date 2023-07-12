@@ -1,0 +1,11 @@
+DEFAULT arch
+MENU TITLE Boot Menu
+PROMPT 0
+TIMEOUT 50
+
+LABEL arch-sd
+MENU LABEL Arch Linux ARM on sd
+LINUX /Image
+INITRD /initramfs-linux.img
+FDT /dtbs/rockchip/rk3399-pinebook-pro.dtb
+APPEND root=UUID=$(UUID-OF-SD-ROOT-PARTITION) rw

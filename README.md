@@ -30,7 +30,54 @@ I needed the following:
 
 ## Phase 1: Creating a bootable Arch based SD card
 
-TBD
+```bash
+# zero out SD card for use
+dd if=/dev/zero of=/dev/mmcblk1 bs=1M count=32
+# Create a GPT partition table on SD card (mmcblk1) of two parittions, the boot partition of 550MB (mmcblk1p1) and the rest into the root (mmcblk1p2)
+parted -s /dev/mmcblk1 mklabel gpt mkpart primary 1 550MiB name 1 boot mkpart primary 550Mib 100% name 2 root
+# Create filesystems on both new partitions on the SD card
+mkfs --type=ext4 -F /dev/mmcblk1p1
+mkfs --type=ext4 -F /dev/mmcblk1p2
+# Mount the new file systems. 
+## noatime because who needs extra writes on an SD card?
+mount -o noatime /dev/mmcblk1p2 /mnt
+### create a /mnt/boot dir for the mount of the boot partition
+mkdir -p /mnt/boot 
+mount -o noatime /dev/mmcblk1p1 /mnt/boot
+### Create a directory for the extlinux file that will be copied or created later
+mkdir -p /mnt/boot/extlinux
+
+# extract the latest Arch Linux for ARM bundle, downloaded in Phase 0, to the root partition of the SD card
+bsdtar -xvpf ArchLinuxARM-aarch64-latest.tar.gz -C /mnt
+# add some additional packages now that will be important once we boot from the SD card later
+## ap6256-firmware is drivers for the wifi chipset in the Pinebook Pro. Very important if you want to have WiFi access from the card boot
+## dialog and wpa_supplicant so that `wifi-menu` will work post boot
+## parted, btrfs-progs, and arch-install-scripts for doing the installs to nvme later
+pacstrap -K /mnt ap6256-firmware wget nvme-cli dialog parted wpa_supplicant btrfs-progs arch-install-scripts
+# create a preliminary /etc/fstab from the mounts already used. saves us from having to do it in the chroot later.
+genfstab -U /mnt >> /mnt/etc/fstab
+# Grab the reference pacman config from my repo, or create your own.
+curl -o /mnt/etc/pacman.conf https://raw.githubusercontent.com/shmoo/Pinebook-Pro/main/References/Files/etc/pacman.conf.sd 
+# Grab the reference extlinux config from my repo, or create your own from scratch - 
+curl -o /mnt/boot/extlinux/extlinux.conf https://raw.githubusercontent.com/shmoo/Pinebook-Pro/main/References/Files/boot/extlinux/extlinux.conf.sd
+arch-chroot /mnt
+    # The following actions all take place INSIDE the chroot instantiated from the above command…
+    echo arch-sd > /etc/hostname
+    echo LANG=en_US.UTF-8 > /etc/locale.conf
+    echo en_US.UTF-8 UTF-8 >> /etc/locale.gen
+    locale-gen
+    echo KEYMAP=us > /etc/vconsole.conf
+    echo FONT=lat9w-16 >> /etc/vconsole.conf
+    ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
+    vi /boot/extlinux/extlinux.conf
+        # Insert the correct UUID from your SD card root partition, probably /dev/mmcblk1p2, into the APPEND line and save
+    mkinitcpio -P
+    exit # Leave the Chroot
+umount -a
+poweroff
+```
+
+After the Pinebook Pro has powered off, power it back and and hit [Esc] when prompted by Tow-Boot to enter the boot selection Menu. Boot from SD. Choose the default boot option, and you should be greeted by a wall of text as we boot into the non-GUI stock vanilla aarch64 Arch Linux.
 
 ## Phase 2: Installing to NVMe from Arch SD Card
 
