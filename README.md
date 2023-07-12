@@ -28,7 +28,13 @@ I needed the following:
 * The latest Aarch64 Arch Linux from <https://archlinuxarm.org/platforms/armv8/generic>. I used the 01-Mar-2023 release.
 * The latest [Tow-Boot](https://tow-boot.org) for Pinebook Pro from <https://github.com/Tow-Boot/Tow-Boot/releases>. I used the 2022.07-006 release.
 
+## Phase 0.5: Tow-Boot on SPI
+
+TBD, for now see <https://forum.pine64.org/showthread.php?tid=17529>
+
 ## Phase 1: Creating a bootable Arch based SD card
+
+The following workflow was all done from a terminal from a Manjaro boot on my intenral emmc. All commands were run as root from a `sudo -s` shell. I did so many installations here trying to get something to work from Manjaro that eventually I just wrote a bash script. You shoould be able to copy & paste it into a root shell and have it work, up until the `arch-chroot` anyway. The chroot has an interactive portion where the UUID of your root partition on the SD card needs to be entered into the `Append` line of the `extlinux.conf` file. If you use vi like me, you can easily cheat by just using `:read !blikd -s UUID -o value /dev/mmcblk1p2` to get the UUID inside of the vi session.
 
 ```bash
 # zero out SD card for use
@@ -57,7 +63,7 @@ pacstrap -K /mnt ap6256-firmware wget nvme-cli dialog parted wpa_supplicant btrf
 # create a preliminary /etc/fstab from the mounts already used. saves us from having to do it in the chroot later.
 genfstab -U /mnt >> /mnt/etc/fstab
 # Grab the reference pacman config from my repo, or create your own.
-curl -o /mnt/etc/pacman.conf https://raw.githubusercontent.com/shmoo/Pinebook-Pro/main/References/Files/etc/pacman.conf.sd 
+curl -o /mnt/etc/pacman.conf https://raw.githubusercontent.com/shmoo/Pinebook-Pro/main/References/Files/etc/pacman.conf
 # Grab the reference extlinux config from my repo, or create your own from scratch - 
 curl -o /mnt/boot/extlinux/extlinux.conf https://raw.githubusercontent.com/shmoo/Pinebook-Pro/main/References/Files/boot/extlinux/extlinux.conf.sd
 arch-chroot /mnt
@@ -71,13 +77,18 @@ arch-chroot /mnt
     ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
     vi /boot/extlinux/extlinux.conf
         # Insert the correct UUID from your SD card root partition, probably /dev/mmcblk1p2, into the APPEND line and save
-    mkinitcpio -P
     exit # Leave the Chroot
 umount -a
 poweroff
 ```
 
+The reason we're using poweroff here and not reboot is I've experienced issues with the Pinebook Pro not recognizing Wifi on reboots. A power-off seems to reset everything however.
+
 After the Pinebook Pro has powered off, power it back and and hit [Esc] when prompted by Tow-Boot to enter the boot selection Menu. Boot from SD. Choose the default boot option, and you should be greeted by a wall of text as we boot into the non-GUI stock vanilla aarch64 Arch Linux.
+
+### Phase 1b: Post SD install update to Arch OS
+
+TBD
 
 ## Phase 2: Installing to NVMe from Arch SD Card
 
