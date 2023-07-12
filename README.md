@@ -233,8 +233,8 @@ TBD
 
 A copy of the important files I referred to repeatedly from my notes for my system are stored here in this repo, in case they're of any use to anyone else.
 
-* [/etc/pacman.conf](Pinebook-Pro/References/Files/etc/pacman.conf) # A list of the repos I used
-* [/etc/mkinitcpio.conf](Pinebook-Pro/References/Files/etc/mkinitcpio.conf) # My working mkinitcpio.conf file for building a Yubikey + LUKS + btrfs initramfs boot image
+* [/etc/pacman.conf](./References/Files/etc/pacman.conf) # A list of the repos I used
+* [/etc/mkinitcpio.conf](./References/Files/etc/mkinitcpio.conf) # My working mkinitcpio.conf file for building a Yubikey + LUKS + btrfs initramfs boot image
 * [/boot/extlinux/extlinux.conf](./References/Files/boot/extlinux/extlinux.conf) # My boot options
 
 ### Repos
