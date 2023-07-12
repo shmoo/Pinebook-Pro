@@ -4,7 +4,7 @@ Adventures in getting everything to work together.
 
 ## What I wanted
 
-I had recently ordered an NVME drive and the [NVME adapter](https://pine64.com/product/pinebook-pro-m-2-ngff-nvme-ssd-interface-adapter/) for my Pinebook Pro, and I wanted to move away from Manjaro for a number of reasons. I'm already a huge fan and user of ZFS, so I wanted to try out btrfs on the nvme for possible performance and snapshots, and to get a better sense of it as a filesystem. I wanted to encrypt the entire working drive and I wanted to decrypt it with my Yubikey.
+I had recently ordered an NVME drive and the [NVME adapter](https://pine64.com/product/pinebook-pro-m-2-ngff-nvme-ssd-interface-adapter/) for my Pinebook Pro, and I wanted to move away from [Manjaro](https://wiki.manjaro.org/index.php/Manjaro-ARM) for a number of reasons. I'm already a huge fan and user of [ZFS](https://en.wikipedia.org/wiki/ZFS), so I wanted to try out [btrfs](https://wiki.archlinux.org/title/Btrfs) on the nvme for possible performance and snapshots, and to get a better sense of it as a filesystem. I wanted to encrypt the entire working drive and I wanted to decrypt it with my Yubikey.
 
 ## What I had
 
@@ -14,12 +14,25 @@ A 2020 [Pinebook Pro](https://www.pine64.org/pinebook-pro/), A [Yubikey 5C NFC](
 
 A record of the final, working, and (hopefully) repeatable process. I took quite a few notes during the process and had many dead ends and resets, so this will likely still have a series of assumptions about my target audience as well as omissions and mistakes.
 
-## NVME installation of aarch65 Arch w/ LUKS container, using btrfs
+## NVME installation of aarch64 Arch w/ LUKS container, using btrfs
 
 This was done from a bootable Aarch64 Arch Linux image on my spare 64GB emmc drive mounted into the SD card adapter and in the SD card slot of they system. The boot/working drive all the commands were run from was mounted as /dev/mmcblk1p1 (boot) and mmcblk1p2 (root).
 All commands were run as `root`/UID0 from a `sudo -s` shell.
 
-### Downloads
+I started with a working Manjaro installation on the internal 128GB emmc of my Pinebook Pro. My early attempts to install Arch Linux directly to the nvme failed as I was trying to do ALL THE THINGS at once. On subsequent attempts I broke it down into parts; Install stock aarch64 Arch Linux onto an SD card, and then us that SD card install to install to the nvme with all the bells & whistles.
+
+## Phase 0: Downloads
+
+I needed the following:
+
+* The latest Aarch64 Arch Linux from <https://archlinuxarm.org/platforms/armv8/generic>. I used the 01-Mar-2023 release.
+* The latest [Tow-Boot](https://tow-boot.org) for Pinebook Pro from <https://github.com/Tow-Boot/Tow-Boot/releases>. I used the 2022.07-006 release.
+
+## Phase 1: Creating a bootable Arch based SD card
+
+TBD
+
+## Phase 2: Installing to NVMe from Arch SD Card
 
 ### Initializing the NVMe device
 
@@ -125,7 +138,7 @@ Notes TBD
 
 ```bash
 ## install Arch
-# Extract the aarch65 arch linux distro to the mounted root
+# Extract the aarch64 arch linux distro to the mounted root
 bsdtar -xvpf ./ArchLinuxARM-aarch64-latest.tar.gz -C /mnt
 # copy the existing extlinux.conf so we have a working copy to modifiy
 cp -Rp /boot/extlinux/extlinux.conf /mnt/boot/extlinux/
@@ -137,7 +150,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 ```
 
 #### Chroot actions
- 
+
 ```bash
 arch-chroot /mnt
 ```
@@ -156,7 +169,7 @@ ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
 
 ###### Edit the extlinux.conf
 
-The cryptdevice=UUID= line(s) need to be set to the UUID of your encrypted NVME partition. You can use `blkid -s UUID` to get the UUID you need. In my case it was the output of `blkid -s UUID /dev/nvme0n1p2`
+The `cryptdevice=UUID=` line(s) need to be set to the UUID of your encrypted NVME partition. You can use `blkid -s UUID` to get the UUID you need. In my case it was the output of `blkid -s UUID /dev/nvme0n1p2`
 
 ```config
 DEFAULT arch
@@ -203,16 +216,33 @@ Once it completes, exit out of the chroot
 exit
 ```
 
-### References
+Umount everything and reboot
 
-#### Files
+```bash
+umount -a
+reboot
+```
 
-#### Repos
+## Phase 3: First boot into arch on nvme and setting up the Yubikey
+
+TBD
+
+## References
+
+### Files
+
+A copy of the important files I referred to repeatedly from my notes for my system are stored here in this repo, in case they're of any use to anyone else.
+
+* /etc/pacman.conf # A list of the repos I used
+* /etc/mkinitcpio.conf # My working mkinitcpio.conf file for building a Yubikey + LUKS + btrfs initramfs boot image
+* /boot/extlinux/extlinux.conf # My boot options
+
+### Repos
 
 * <https://pacman.kiljan.org/archlinuxarm-pbp/os/aarch64/>
 * <http://nj.us.mirror.archlinuxarm.org/aarch64/>
 
-#### Other References
+### Other References
 
 * <https://ryankozak.com/luks-encrypted-arch-linux-on-pinebook-pro-again/>
 * <https://github.com/infinitechris/PineBookProArchSetup/tree/main>
