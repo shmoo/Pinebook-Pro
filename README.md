@@ -284,6 +284,7 @@ reboot
 ## Phase 3: First boot into arch on nvme and setting up the Yubikey
 
 TBD
+I followed guide from <https://github.com/agherzan/yubikey-full-disk-encryption>.
 
 ## References
 
@@ -307,3 +308,4 @@ A copy of the important files I referred to repeatedly from my notes for my syst
 * <https://wiki.pine64.org/wiki/Pinebook_Pro_Installing_Arch_Linux_ARM>
 * <https://github.com/SvenKiljan/archlinuxarm-pbp/blob/main/INSTALL.md>
 * <https://nerdstuff.org/posts/2020/2020-004_arch_linux_luks_btrfs_systemd-boot/>
+* <https://github.com/agherzan/yubikey-full-disk-encryption>
